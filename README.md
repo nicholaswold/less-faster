@@ -5,7 +5,7 @@ Because lesscss-maven-plugin is slow as hell.
 
 ## Installation
 
-First, take the compileLess file and put it in `/usr/local/bin`. Then make sure you have (http://lesscss.org/)[lessc] and the (https://github.com/less/less-plugin-clean-css)[less-plugin-clean-css] module installed.
+First, take the compileLess file and put it in `/usr/local/bin`. Then make sure you have [lessc](http://lesscss.org/) and the [less-plugin-clean-css](https://github.com/less/less-plugin-clean-css) module installed.
 
 Then put this in your pom.xml. Make sure that your target directory is accurate!
 
