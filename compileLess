@@ -1,0 +1,55 @@
+#!/bin/bash -e
+# Rapidly compile all LESS files
+# Takes two arguments:
+#   1. The base directory for your less files.
+#      In maven this should be project.basedir
+#   2. The final build directory for your artifact
+#      In maven this is your project.build.directory
+
+# https://github.com/less/less-plugin-clean-css
+# https://github.com/jakubpawlowicz/clean-css
+
+# NOTE: HEY YOU! Update these three directories to correctly match where your LESS is!
+BASEDIR=$1/src/main/webapp
+INPUTDIR=$BASEDIR/less/pages/
+OUTPUTDIR=$2/css/less/pages/
+DIRECTORIES=$(find $INPUTDIR -follow -type d)
+FILES=$(find $INPUTDIR -follow -name *.less)
+SUCCESSES=0
+CLEANCSS="" # Update this with any extra minification values you'd like!
+
+compile() {
+    local from=$1
+    local relpath=$(python -c "import os.path; print os.path.relpath('$from', '$INPUTDIR')")
+    local to="${OUTPUTDIR}${relpath%.less}.css"
+
+    T="$(date +%s%N | cut -b1-13)"
+    lessc $from --clean-css="$CLEANCSS" > $to
+    T="$(($(date +%s%N | cut -b1-13)-T))"
+    echo "Finished compiling to $to in ${T}ms"
+}
+
+ensureDirectoryExists() {
+    local directory=$1
+    local relpath=$(python -c "import os.path; print os.path.relpath('$directory', '$INPUTDIR')")
+    local finalpath=${OUTPUTDIR}${relpath}
+    mkdir -p $finalpath
+}
+
+echo "Constructing LESS directories..."
+for directory in $DIRECTORIES
+do
+    ensureDirectoryExists $directory
+done
+
+echo "Compiling LESS files..."
+TOTALTIME="$(date +%s%N | cut -b1-13)"
+for entry in $FILES
+do
+    compile "$entry" &
+    SUCCESSES=$((SUCCESSES+1))
+done
+wait
+
+TOTALTIME="$(($(date +%s%N | cut -b1-13)-TOTALTIME))"
+echo "Compiled ${SUCCESSES} LESS files in ${TOTALTIME}ms"
